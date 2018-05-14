@@ -1,0 +1,6 @@
+{
+  "name": "Galactic Center Stellar Orbit Dashboard",
+  "description": "A web service to integrate and visualize stellar orbits in the Galactic Center.",
+  "image": "heroku/python",
+  "keywords": ["python", "dash"]
+}
