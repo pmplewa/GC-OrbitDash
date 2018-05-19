@@ -19,6 +19,7 @@ Example parameter file:
   "start_time": 1990,
   "end_time": 2030,
   "time_steps": 500,
+  "enable_gr": true,
   "bodies": [
   {
     "hash": "Sgr A*",
@@ -38,7 +39,8 @@ Example parameter file:
     "inc": 0.78,
     "Omega": 0,
     "omega": 0,
-    "T": 2000
+    "T": 2000,
+    "primary": "Sgr A*"
   },
   {
     "hash": "S2",
@@ -48,7 +50,8 @@ Example parameter file:
     "inc": 2.34,
     "Omega": 3.96,
     "omega": 1.15,
-    "T": 2002.33
+    "T": 2002.33,
+    "primary": "com"
   }]
 }
 ```

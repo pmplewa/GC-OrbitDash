@@ -39,11 +39,14 @@ default_params = (
         "inc": 2.34,
         "Omega": 3.96,
         "omega": 1.15,
-        "T": 2002.33
+        "T": 2002.33,
+        "primary": "Sgr A*"
     }]
 })
 
 empty_csv = "data:text/csv;charset=utf-8,"
+
+# App Setup
 
 flask_app = Flask(__name__)
 dash_app = dash.Dash(__name__, server=flask_app)
@@ -53,69 +56,153 @@ dash_app.css.append_css(
     "external_url": "https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
 })
 
+# App Layout
+
 dash_app.layout = html.Div(
-    className="container-fluid",
+    className="container",
     children=(
     [
-        dcc.Upload(
-            id="upload-data",
-            className="jumbotron",
+        html.Div(
             children=(
-                html.Div(
-                    className="text-center",
+            [
+                dcc.Upload(
+                    id="upload-data",
+                    className="jumbotron",
                     children=(
-                        html.Button("Upload Parameter File",
-                                     className="btn btn-outline-dark btn-lg")
+                        html.Div(
+                            className="text-center",
+                            children=(
+                                html.Button("Upload Parameter File",
+                                    className="btn btn-outline-dark btn-lg")
+                            )
+                        )
+                    ),
+                    multiple=False
+                ),
+                html.Div(id="confirm-upload", className="text-center"),
+                html.Div(id="confirm-simulation", className="text-center")
+            ])
+        ),
+
+        html.Hr(),
+
+        html.Div(
+            className="row",
+            children=(
+            [
+                html.Div(
+                    className="col-lg-6",
+                    children=(
+                        dcc.Graph(id="2d-graph")
+                    )
+                ),
+                html.Div(
+                    className="col-lg-6",
+                    children=(
+                        dcc.Graph(id="3d-graph")
                     )
                 )
-            ),
-            multiple=False
+            ])
         ),
-    
-        html.Div(id="confirm-upload", className="text-center"),
+        
         html.Hr(),
-    
-        dcc.Graph(id="orbit-graph"),
-        html.Hr(),
-    
-        dcc.Graph(id="1d-graph"),    
+
         html.Div(
-            className="text-center",
+            className="row",
             children=(
-                dcc.RadioItems(
-                    className="btn-group btn-group-toggle",
-                    labelClassName="btn btn-secondary",                    
-                    id="1d-graph-picker",
-                    options=(
+                html.Div(
+                    className="col-lg-12",
+                    children=(
                     [
-                        {"label": "x", "value": "x"},
-                        {"label": "y", "value": "y"},
-                        {"label": "z", "value": "z"},
-                        {"label": "vx", "value": "vx"},
-                        {"label": "vy", "value": "vy"},
-                        {"label": "vz", "value": "vz"},
-                        {"label": "vrD", "value": "vrD"}
-                    ]),
-                    value="vz",
+                        dcc.Graph(id="1d-graph"),
+        
+                        html.Div(
+                            className="text-center",
+                            children=(
+                                dcc.RadioItems(
+                                    className="btn-group btn-group-toggle",
+                                    labelClassName="btn btn-secondary",                    
+                                    id="1d-graph-picker",
+                                    options=(
+                                    [
+                                        {"label": "x", "value": "x"},
+                                        {"label": "y", "value": "y"},
+                                        {"label": "z", "value": "z"},
+                                        {"label": "vx", "value": "vx"},
+                                        {"label": "vy", "value": "vy"},
+                                        {"label": "vz", "value": "vz"},
+                                        {"label": "vzD", "value": "vzD"}
+                                    ]),
+                                    value="vz",
+                                )
+                            )
+                        )
+                    ])
                 )
             )
-        ),    
+        ),
+
         html.Hr(),
-    
-        dcc.Graph(id="3d-graph"),
-        html.Hr(),
-    
-        dcc.Dropdown(id="table-selector", options=[]),
-        html.Div(id="data-table", className="p-3"),
+
         html.Div(
-            className="text-center pb-5",
+            className="row",
             children=(
-                html.A(
-                    "Download Table",
-                    id="download-link",
-                    className="btn btn-secondary",
-                    download="data.csv",
-                    href=empty_csv
+                html.Div(
+                    className="col-lg-12",
+                    children=(
+                    [
+                        dcc.Graph(id="parameter-graph"),
+        
+                        html.Div(
+                            className="text-center",
+                            children=(
+                                dcc.RadioItems(
+                                    className="btn-group btn-group-toggle",
+                                    labelClassName="btn btn-secondary",                    
+                                    id="parameter-graph-picker",
+                                    options=(
+                                    [
+                                        {"label": "a", "value": "a"},
+                                        {"label": "e", "value": "e"},
+                                        {"label": "inc", "value": "inc"},
+                                        {"label": "Omega", "value": "Omega"},
+                                        {"label": "omega", "value": "omega"},
+                                        #{"label": "T", "value": "T"},
+                                        {"label": "P", "value": "P"}
+                                    ]),
+                                    value="a",
+                                )
+                            )
+                        )
+                    ])
+                )
+            )
+        ),
+
+        html.Hr(),
+
+        html.Div(
+            className="row",
+            children=(
+                html.Div(
+                    className="col-lg-12",
+                    children=(
+                    [            
+                        dcc.Dropdown(id="table-selector", options=[]),
+                        html.Div(id="data-table", className="pt-3 pb-3"),
+                        html.Div(
+                            className="text-center pb-5",
+                            children=(
+                                html.A(
+                                    "Download Table",
+                                    id="download-link",
+                                    className="btn btn-secondary",
+                                    download="data.csv",
+                                    href=empty_csv
+                                )
+                            )
+                        )
+                    ])
                 )
             )
         ),
@@ -125,12 +212,14 @@ dash_app.layout = html.Div(
         html.Div(dt.DataTable(rows=[{}]), style={"display": "none"})
     ])
 )
-    
+
+## Data Upload
+
 @dash_app.callback(Output("params-cache", "children"),
                   [Input("upload-data", "contents"),
                    Input("upload-data", "filename"),
                    Input("upload-data", "last_modified")])
-def update_output(contents, filename, date):
+def upload_data(contents, filename, date):
     if contents is not None:
         content_type, content_string = contents.split(",")
         content_string = b64decode(content_string)
@@ -155,6 +244,8 @@ def confirm_upload(json_data):
     params = json.loads(json_data)
     return html.P(params["message"])
 
+# Simulation
+
 @functools.lru_cache(maxsize=32)
 def global_store(json_data):
     params = json.loads(json_data)
@@ -167,83 +258,54 @@ def compute_value(json_data):
     global_store(json_data)
     return json_data
 
-def get_xy_data(item, x, y, marker_size=5):
-    key, df = item
-    return (
-    {
-        "x": df[x],
-        "y": df[y],
-        "name": key,
-        "type": "scatter",
-        "mode": "lines+markers",
-        "marker": {"size": marker_size}
-    })
+@dash_app.callback(Output("confirm-simulation", "children"),
+                   [Input("update-signal", "children")])
+def confirm_simulation(json_data):
+    params = json.loads(json_data)
+    if not params["error"]:
+        simulation = global_store(json_data)
+        return html.P(simulation["message"])
+    return html.P("")
 
-def get_xyz_data(item, x, y, z, marker_size=5):
-    key, df = item
-    return (
-    {
-        "x": df[x],
-        "y": df[y],
-        "z": df[z],
-        "name": key,
-        "type": "scatter3d",
-        "mode": "lines+markers",
-        "marker": {"size": marker_size}
-    })
+# Graphs
 
-@dash_app.callback(Output("orbit-graph", "figure"),
+@dash_app.callback(Output("2d-graph", "figure"),
                   [Input("update-signal", "children")])
-def update_orbit_graph(json_data):
+def update_2d_graph(json_data):
     figure = (
     {
         "data": []
     })
     params = json.loads(json_data)
     if not params["error"]:  
-        simulation_data = global_store(json_data)
-        figure["data"] = [get_xy_data(item, "x", "y")
-            for item in simulation_data.items()]
-        figure["layout"] = (
-        {
-            "xaxis":
+        simulation = global_store(json_data)
+        if not simulation["error"]:
+            figure["data"] = (
+            [
+                {
+                    "x": df["x"],
+                    "y": df["y"],
+                    "name": name,
+                    "type": "scatter",
+                    "mode": "lines+markers",
+                    "marker": {"size": 5}
+                }
+                for name, df in simulation["data"].items()
+            ])
+            figure["layout"] = (
             {
-                "title": "x"
-            },
-            "yaxis":
-            {
-                "title": "y",
-                "scaleanchor": "x",
-                "scaleratio": 1
-            }
-        })  
+                "xaxis":
+                {
+                    "title": "x"
+                },
+                "yaxis":
+                {
+                    "title": "y",
+                    "scaleanchor": "x",
+                    "scaleratio": 1
+                }
+            })
     return figure
-
-@dash_app.callback(Output("1d-graph", "figure"),
-                  [Input("update-signal", "children"),
-                   Input("1d-graph-picker", "value")])
-def update_1d_graph(json_data, picker_value):
-    figure = (
-    {
-        "data": []
-    })
-    params = json.loads(json_data)
-    if not params["error"]: 
-        simulation_data = global_store(json_data)
-        figure["data"] = [get_xy_data(item, "t", picker_value)
-            for item in simulation_data.items()]
-        figure["layout"] = (
-        {
-            "xaxis":
-            {
-                "title": "t"
-            },
-            "yaxis": 
-            {
-                "title": picker_value
-            }
-        })
-    return figure    
 
 @dash_app.callback(Output("3d-graph", "figure"),
                   [Input("update-signal", "children")])
@@ -254,14 +316,80 @@ def update_3d_graph(json_data):
     })
     params = json.loads(json_data)
     if not params["error"]: 
-        simulation_data = global_store(json_data)
-        figure["data"] = [get_xyz_data(item, "x", "y", "z")
-            for item in simulation_data.items()]
-        figure["layout"] = (
-        {
-            "height": 800
-        })
-    return figure
+        simulation = global_store(json_data)
+        if not simulation["error"]:
+            figure["data"] = (
+            [
+                {
+                    "x": df["x"],
+                    "y": df["y"],
+                    "z": df["z"],
+                    "name": name,
+                    "type": "scatter3d",
+                    "mode": "lines+markers",
+                    "marker": {"size": 5}
+                }
+                for name, df in simulation["data"].items()
+            ])
+            figure["layout"] = (
+            {
+                "scene": {"aspectmode": "data"}
+            })
+    return figure    
+
+def update_1d_graph(key):
+    def func_wrapper(func):
+        def create_figure(json_data, picker_value):
+            figure = (
+            {
+                "data": []
+            })
+            params = json.loads(json_data)
+            if not params["error"]: 
+                simulation = global_store(json_data)
+                if not simulation["error"]:
+                    figure["data"] = (
+                    [
+                        {
+                            "x": df["t"],
+                            "y": df[picker_value],
+                            "name": name,
+                            "type": "scatter",
+                            "mode": "lines+markers",
+                            "marker": {"size": 5}
+                        }
+                        for name, df in simulation[key].items()
+                    ])
+                    figure["layout"] = (
+                    {
+                        "xaxis":
+                        {
+                            "title": "t"
+                        },
+                        "yaxis": 
+                        {
+                            "title": picker_value
+                        }
+                    })
+            return figure
+        return create_figure
+    return func_wrapper   
+
+@dash_app.callback(Output("1d-graph", "figure"),
+                  [Input("update-signal", "children"),
+                   Input("1d-graph-picker", "value")])
+@update_1d_graph("data")
+def update_orbit_graph():
+    pass
+
+@dash_app.callback(Output("parameter-graph", "figure"),
+                  [Input("update-signal", "children"),
+                   Input("parameter-graph-picker", "value")])
+@update_1d_graph("orbits")
+def update_parameter_graph():
+    pass
+
+# Table
 
 @dash_app.callback(Output("table-selector", "value"),
                   [Input("params-cache", "children")])
@@ -273,15 +401,16 @@ def reset_table_selector(json_data):
 def update_table_selector(json_data):
     params = json.loads(json_data)
     if not params["error"]:
-        simulation_data = global_store(json_data)
-        return (
-        [
-            {
-                "label": name,
-                "value": name
-            }
-            for name in simulation_data.keys()
-        ])
+        simulation = global_store(json_data)
+        if not simulation["error"]:
+            return (
+            [
+                {
+                    "label": name,
+                    "value": name
+                }
+                for name in simulation["data"].keys()
+            ])
     return []
 
 @dash_app.callback(Output("data-table", "children"),
@@ -291,9 +420,10 @@ def update_table(name, json_data):
     if name is not None:
         params = json.loads(json_data)
         if not params["error"]:        
-            simulation_data = global_store(json_data)
-            df = simulation_data[name]
-            return dt.DataTable(rows=df.to_dict("records"))
+            simulation = global_store(json_data)
+            if not simulation["error"]:
+                df = simulation["data"][name]
+                return dt.DataTable(rows=df.to_dict("records"))
     return []
 
 @dash_app.callback(Output("download-link", "href"),
@@ -303,9 +433,10 @@ def update_download_link(name, json_data):
     if name is not None:
         params = json.loads(json_data)
         if not params["error"]:   
-            simulation_data = global_store(json_data)
-            df = simulation_data[name]
-            csv = df.to_csv(index=False, encoding="utf-8")
-            csv = f"data:text/csv;charset=utf-8,{quote(csv)}"
-            return csv
+            simulation = global_store(json_data)
+            if not simulation["error"]:
+                df = simulation["data"][name]
+                csv = df.to_csv(index=False, encoding="utf-8")
+                csv = f"data:text/csv;charset=utf-8,{quote(csv)}"
+                return csv
     return empty_csv
