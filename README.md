@@ -2,11 +2,6 @@
 
 This web service can integrate and visualize stellar orbits in the Galactic Center.
 
-It is currently hosted at the following URL for testing:
-```
-https://orbit-dash.herokuapp.com
-```
-
 The orbit integration is performed using the [REBOUND](https://github.com/hannorein/rebound) code and its [REBOUNDx](https://github.com/dtamayo/reboundx) extensions, to account for first-order post-Newtonian corrections. The interface is built on top of [Dash](https://plot.ly/products/dash/).
 
 ![](preview.png)
